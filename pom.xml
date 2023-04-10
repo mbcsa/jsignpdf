@@ -8,7 +8,7 @@
 
     <name>${project.artifactId}</name>
     <description>JSignPdf - application for signing PDF files</description>
-    <url>https://github.com/intoolswetrust/jsignpdf</url>
+    <url>https://github.com/mbcsa/jsignpdf</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -168,9 +168,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/intoolswetrust/jsignpdf.git</connection>
-        <developerConnection>scm:git:git@github.com:intoolswetrust/jsignpdf.git</developerConnection>
-        <url>http://github.com/intoolswetrust/jsignpdf/</url>
+        <connection>scm:git:git://github.com/mbcsa/jsignpdf.git</connection>
+        <developerConnection>scm:git:git@github.com:mbcsa/jsignpdf.git</developerConnection>
+        <url>http://github.com/mbcsa/jsignpdf/</url>
         <tag>JSignPdf_2_0_0</tag>
     </scm>
 
