@@ -8,12 +8,12 @@
     <parent>
         <groupId>com.github.kwart.jsign</groupId>
         <artifactId>jsignpdf-root</artifactId>
-        <version>2.0.0</version>
+        <version>2.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>
-        <exec.mainClass>net.sf.jsignpdf.SimpleSigner</exec.mainClass>
+        <exec.mainClass>net.sf.jsignpdf.Signer</exec.mainClass>
     </properties>
 
     <build>
@@ -103,22 +103,6 @@
         <dependency>
             <groupId>com.github.kwart.jsign</groupId>
             <artifactId>jsign-pkcs11</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.kie.server</groupId>
-            <artifactId>kie-server-client</artifactId>
-            <version>7.73.0.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.external</groupId>
-            <artifactId>AbsoluteLayout</artifactId>
-            <version>RELEASE170</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20230227</version>
         </dependency>
     </dependencies>
 </project>

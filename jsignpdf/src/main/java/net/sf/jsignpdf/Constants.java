@@ -413,6 +413,9 @@ public class Constants {
     public static final String ARG_GUI = "gui";
 
     public static final Set<String> SUPPORTED_CRITICAL_EXTENSION_OIDS;
+    
+    public static final String ARG_TOKEN = "token";
+    public static final String ARG_PID = "pid";
 
     static {
         final Set<String> oidSet = new HashSet<String>();
