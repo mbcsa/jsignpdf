@@ -29,6 +29,7 @@
  */
 package net.sf.jsignpdf;
 
+import java.awt.event.WindowEvent;
 import static net.sf.jsignpdf.Constants.EXIT_CODE_NO_COMMAND;
 import static net.sf.jsignpdf.Constants.EXIT_CODE_PARSE_ERR;
 import static net.sf.jsignpdf.Constants.NEW_LINE;
@@ -45,6 +46,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import javax.swing.JOptionPane;
 
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -94,18 +96,20 @@ public class SimpleSigner {
         KieOptions kieOptions = new KieOptions();
 
         if (args != null && args.length > 0) {
-            
-            kieOptions.loadOptions(args);
-
-//            tmpOpts = new SignerOptionsFromCmdLine();
-//            parseCommandLine(args, tmpOpts);
+            try {
+                kieOptions.loadOptions(args);
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.SEVERE, "Cannot load options", e);
+                JOptionPane.showMessageDialog(null, "El tiempo especificado para la firma expirado. Vuelva a iniciar el proceso de firma desde el portal.");
+                System.exit(0);
+            }
         }
 
-        try {
-            SSLInitializer.init();
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
-        }
+//        try {
+//            SSLInitializer.init();
+//        } catch (Exception e) {
+//            LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
+//        }
 
         // PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
 

@@ -4,7 +4,11 @@
  */
 package net.sf.jsignpdf.kie;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,24 +19,50 @@ import org.json.JSONObject;
 public class KieOptions {
     private String jwt;
     private Long processInstanceId;
-    
+    private String containerId;
+    private Long taskId;
+    private String userId;
+
     public void loadOptions(String[] args) {
-        
-        if (args.length != 2) {
-            System.out.println("Cantidad de parámetros incorrectos");
-            return;
+        if (args.length != 4) {
+            throw new IllegalArgumentException("Cantidad de parámetros incorrectos");
         }
         
-        if (!isJWT(args[0])) {
-            System.out.println("Parámetro incorrecto (1)");
+        if (args[0].length() == 0) {
+            throw new IllegalArgumentException("Parámetro incorrecto (1)");
         }
         
         if (!isNumeric(args[1])) {
-            System.out.println("Parámetro incorrecto (2)");
+            throw new IllegalArgumentException("Parámetro incorrecto (2)");
         }
         
-        this.jwt = args[0];
+        if (!isNumeric(args[2])) {
+            throw new IllegalArgumentException("Parámetro incorrecto (3)");
+        }
+        
+        if (!isJWT(args[3])) {
+            throw new IllegalArgumentException("Parámetro incorrecto (4)");
+        }
+        
+        this.containerId = args[0];
         this.processInstanceId = Long.parseLong(args[1]);
+        this.taskId = Long.parseLong(args[2]);
+        this.jwt = args[3];
+        
+        //verify and use
+        JWebToken incomingToken;
+        try {
+            System.out.println(this.jwt);
+            incomingToken = new JWebToken(this.jwt);
+            //TODO: Validar token cuando se resuelva la clave.
+            // if (!incomingToken.isValid()) {
+            // List<String> audience = incomingToken.getAudience();
+            // Subject tiene el ID de usuario
+            this.userId = incomingToken.getSubject();
+            // }
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
     
@@ -83,5 +113,28 @@ public class KieOptions {
         this.processInstanceId = processInstanceId;
     }
     
+    public String getContainerId() {
+        return containerId;
+    }
+
+    public void setContainerId(String containerId) {
+        this.containerId = containerId;
+    }
+    
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
     
 }

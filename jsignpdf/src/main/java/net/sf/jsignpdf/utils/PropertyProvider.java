@@ -57,7 +57,7 @@ public class PropertyProvider {
     /**
      * <code>PROPERTY_FILE</code> contains default filename for property file.
      */
-    public static final String PROPERTY_FILE = System.getProperty("user.home") + "/.JSignPdf";
+    public static final String PROPERTY_FILE = System.getProperty("user.home") + File.separator + ".JSignPdf";
 
     private static final File PROPERTY_FILE_FILE = new File(PROPERTY_FILE);
 

@@ -4,55 +4,75 @@
  */
 package net.sf.jsignpdf;
 
-import java.util.Iterator;
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import static net.sf.jsignpdf.Constants.LOGGER;
 import net.sf.jsignpdf.kie.KieOptions;
 import net.sf.jsignpdf.kie.KieService;
-import org.kie.server.api.model.instance.ProcessInstance;
-import org.kie.server.api.model.instance.TaskSummary;
-import org.kie.server.api.model.instance.TaskSummaryList;
+import net.sf.jsignpdf.utils.PKCS11Utils;
+import org.apache.commons.io.FileUtils;
+import org.kie.server.api.model.instance.DocumentInstance;
+import org.kie.server.api.model.instance.TaskInstance;
 
-
-/**
+/**|
  *
  * @author maro
  */
 public class SignPanel extends javax.swing.JPanel {
 
-    private static final String jbpm_containerId = "Firma_2.2.6-SNAPSHOT";
-    private static final Long jbpm_processInstanceId = 268L;
+    private static KieService kieService;
+    private TaskInstance taskInstance;
+    private KieOptions kieOptions;
+    
     /**
      * Creates new form panel2
      */
     public SignPanel(KieOptions kieOptions) {
         initComponents();
-        
-        // Obtento la lista de tareas
-        // TODO: Cambiar por la lista de tareas
-        System.out.println("OBTENER LISTA DE TAREAS");
-        ProcessInstance pi = KieService.getProcessInstance(kieOptions.getJwt(), jbpm_containerId,kieOptions.getProcessInstanceId());
-        if ( pi != null ) {
-            txtNombre.setText(pi.getProcessName());
-            txtVersion.setText(pi.getProcessVersion());
-            txtDescrip.setText(pi.getProcessInstanceDescription());
-            
-            //TODO: ver datos de tarea y variables
-//            TaskSummary[] ts = pi.getActiveUserTasks().getTasks();
-//            for(TaskSummary t: ts) {
-//                System.out.println(t.getDescription());
-//            }
-//            Map<String, Object> map = pi.getVariables();
-//            
-//            
-//            Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
-//            while (iterator.hasNext()) {
-//                Map.Entry<String, Object> entry = iterator.next();
-//                System.out.println(entry.getKey() + ":" + entry.getValue());
-//            }
-        } else {
-            lblDoc.setText("No se encontraron documentos para firmar.");
-            jpanelFirma.setVisible(false);
+        this.kieOptions = kieOptions;
+        jpanelFirma.setVisible(false);
+        kieService = KieService.getInstance(this.kieOptions.getJwt());
+        try {
+            // ProcessInstance pi = kieService.getProcessInstance(kieOptions.getContainerId(),kieOptions.getProcessInstanceId());            
+            taskInstance = kieService.getTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId());
+            System.out.println(taskInstance.toString());
+            System.out.println(taskInstance.getInputData());
+            if ( taskInstance != null ) {
+                txtNombre.setText(taskInstance.getContainerId());
+                txtVersion.setText(taskInstance.getName());
+                txtDescrip.setText("nada");
+                //TODO: ver datos de tarea y variables
+    //            TaskSummary[] ts = pi.getActiveUserTasks().getTasks();
+    //            for(TaskSummary t: ts) {
+    //                System.out.println(t.getDescription());
+    //            }
+    //            Map<String, Object> map = pi.getVariables();
+    //            
+    //            
+    //            Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+    //            while (iterator.hasNext()) {
+    //                Map.Entry<String, Object> entry = iterator.next();
+    //                System.out.println(entry.getKey() + ":" + entry.getValue());
+    //            }
+                jpanelFirma.setVisible(true);
+            } else {
+                lblDoc.setText("No se encontraron documentos para firmar.");
+                jpanelFirma.setVisible(false);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Cannot get tasks", e);
+            JOptionPane.showMessageDialog(null, "El tiempo especificado para la firma expirado. Vuelva a iniciar el proceso de firma desde el portal.");
+            System.exit(0);
         }
     }
 
@@ -66,74 +86,125 @@ public class SignPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jpanelFirma = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        txtNombre = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        txtVersion = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        txtDescrip = new javax.swing.JTextField();
         lblDoc = new javax.swing.JLabel();
+        lblNombre = new javax.swing.JLabel();
+        txtNombre = new javax.swing.JTextField();
+        lblDescrip = new javax.swing.JLabel();
+        txtDescrip = new javax.swing.JTextField();
+        txtVersion = new javax.swing.JTextField();
+        btnAceptar = new javax.swing.JButton();
+        btnRechazar = new javax.swing.JButton();
+        lblVersion = new javax.swing.JLabel();
 
-        setLayout(new java.awt.BorderLayout());
-
-        jLabel1.setText("Nombre");
-
-        jLabel2.setText("Version");
-
-        jLabel4.setText("Descrip");
-
-        javax.swing.GroupLayout jpanelFirmaLayout = new javax.swing.GroupLayout(jpanelFirma);
-        jpanelFirma.setLayout(jpanelFirmaLayout);
-        jpanelFirmaLayout.setHorizontalGroup(
-            jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jpanelFirmaLayout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addGroup(jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel4))
-                .addGap(61, 61, 61)
-                .addGroup(jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtNombre)
-                    .addComponent(txtVersion)
-                    .addComponent(txtDescrip, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(488, Short.MAX_VALUE))
-        );
-        jpanelFirmaLayout.setVerticalGroup(
-            jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jpanelFirmaLayout.createSequentialGroup()
-                .addGap(29, 29, 29)
-                .addGroup(jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(txtVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jpanelFirmaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(txtDescrip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(491, Short.MAX_VALUE))
-        );
-
-        add(jpanelFirma, java.awt.BorderLayout.CENTER);
+        jpanelFirma.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblDoc.setBackground(new java.awt.Color(255, 255, 255));
         lblDoc.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
         lblDoc.setForeground(new java.awt.Color(0, 0, 0));
         lblDoc.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblDoc.setText("Documento pendiente de firma:");
-        add(lblDoc, java.awt.BorderLayout.PAGE_START);
+        jpanelFirma.add(lblDoc, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 410, -1));
+
+        lblNombre.setText("Nombre");
+        jpanelFirma.add(lblNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
+        jpanelFirma.add(txtNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, 260, -1));
+
+        lblDescrip.setText("Descrip");
+        jpanelFirma.add(lblDescrip, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 80, -1, -1));
+        jpanelFirma.add(txtDescrip, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 80, 260, -1));
+        jpanelFirma.add(txtVersion, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 120, 260, -1));
+
+        btnAceptar.setText("Aceptar y Firmar");
+        btnAceptar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAceptarActionPerformed(evt);
+            }
+        });
+        jpanelFirma.add(btnAceptar, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 220, 150, -1));
+
+        btnRechazar.setText("Rechazar");
+        jpanelFirma.add(btnRechazar, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 220, 150, -1));
+
+        lblVersion.setText("Version");
+        jpanelFirma.add(lblVersion, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 120, -1, -1));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jpanelFirma, javax.swing.GroupLayout.PREFERRED_SIZE, 516, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jpanelFirma, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        getAccessibleContext().setAccessibleName("");
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAceptarActionPerformed
+        // VER: https://blog.kie.org/2020/05/user-tasks-and-forms.html
+        // Obtengo la tarea, si no está "Ready",la "tomo"
+        System.out.println("Status: " + taskInstance.getStatus());
+        if (taskInstance.getStatus() == "Created") {
+            System.out.println("Tarea en estado 'Created', la reclamo");
+            kieService.claimTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
+        }
+        // Inicio la tarea
+        if ((taskInstance.getStatus() == "Ready") || (taskInstance.getStatus() == "Reserved")) {
+            System.out.println("Tarea en estado 'Ready', la inicio");
+            kieService.startTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
+        }
+        System.out.println("Descargo el PDF");
+        // Descargo el PDF
+        String idDocPDF = taskInstance.getInputData().get("idDocumentoPDF").toString();
+        DocumentInstance document = kieService.getDocument(idDocPDF);
+        
+        try {
+            File file;
+            System.out.println("Documento:" + document.getIdentifier());
+            file = new File(document.getIdentifier());
+            FileOutputStream fileOuputStream = new FileOutputStream(file);
+            fileOuputStream.write(document.getContent());
+            fileOuputStream.close();
+            // Firmo el PDF
+            System.out.println("PENDIENTE FIRMAR");
+            byte[] inFileBytes = Files.readAllBytes(Paths.get(file.getPath()));
+            document.setContent(inFileBytes);
+            file.deleteOnExit();
+            // Subo el PDF a jBPM
+            System.out.println("Hago el update");
+            kieService.updateDocument(document);
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.toString());
+            Logger.getLogger(SignPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+            Logger.getLogger(SignPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.exit(0);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("firmaConcesionario", true);
+        // Completo la tarea con el ID de upload
+        kieService.completeTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
+    }//GEN-LAST:event_btnAceptarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JButton btnAceptar;
+    private javax.swing.JButton btnRechazar;
     private javax.swing.JPanel jpanelFirma;
+    private javax.swing.JLabel lblDescrip;
     private javax.swing.JLabel lblDoc;
+    private javax.swing.JLabel lblNombre;
+    private javax.swing.JLabel lblVersion;
     private javax.swing.JTextField txtDescrip;
     private javax.swing.JTextField txtNombre;
     private javax.swing.JTextField txtVersion;

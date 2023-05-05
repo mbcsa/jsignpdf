@@ -32,10 +32,16 @@ package net.sf.jsignpdf.utils;
 import static net.sf.jsignpdf.Constants.LOGGER;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,11 +63,26 @@ public class PKCS11Utils {
      */
     public static void registerProviders(final String configPath) {
         if (StringUtils.isEmpty(configPath)) {
+            LOGGER.severe("Config path empty: " + configPath);
             return;
         }
         LOGGER.fine("Registering SunPKCS11 provider from configuration in " + configPath);
-        final File cfgFile = IOUtils.findFile(configPath);
-        final String absolutePath = cfgFile.getAbsolutePath();
+//        final File cfgFile = IOUtils.findFile(configPath);
+//        final String absolutePath = cfgFile.getAbsolutePath();
+        
+        // File cfgFile = null;
+        String absolutePath = "";
+
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(configPath);
+        File cfgFile = new File("current.cfg");
+        try {
+            FileUtils.copyURLToFile(resource, cfgFile);
+        } catch (IOException ex) {
+            Logger.getLogger(PKCS11Utils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        absolutePath = cfgFile.getAbsolutePath();
+        
         if (cfgFile.isFile()) {
             SUN_PROVIDER = initPkcs11Provider(absolutePath, "sun.security.pkcs11.SunPKCS11");
             JSIGN_PROVIDER = initPkcs11Provider(absolutePath, "com.github.kwart.jsign.pkcs11.JSignPKCS11");

@@ -56,6 +56,7 @@ public class Constants {
                 getResourceAsStream("logging.properties")) {
             LogManager.getLogManager().readConfiguration(is);
         } catch (IOException e) {
+            System.out.println("Error durante lectura de loggin.properties");
             e.printStackTrace();
         }
     }
@@ -98,7 +99,7 @@ public class Constants {
      */
     public static final String PROPERTIES_FILE = ".JSignPdf";
 
-    public static final String CONF_FILE = "conf/conf.properties";
+    public static final String CONF_FILE = "conf.properties";
 
     /**
      * Name of X.509 certificate type.

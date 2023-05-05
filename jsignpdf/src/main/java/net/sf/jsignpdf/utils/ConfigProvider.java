@@ -30,6 +30,7 @@
 package net.sf.jsignpdf.utils;
 
 import net.sf.jsignpdf.Constants;
+import static net.sf.jsignpdf.Constants.LOGGER;
 
 /**
  * Property holder for tweak file.
@@ -57,7 +58,9 @@ public class ConfigProvider extends PropertyProvider {
      */
     @Override
     public void loadDefault() throws ProperyProviderException {
-        loadProperties(IOUtils.findFile(Constants.CONF_FILE));
+        // loadProperties(IOUtils.findFile(Constants.CONF_FILE));
+        System.out.println("Loading defaults from " + Constants.CONF_FILE);
+        loadProperties( Thread.currentThread().getContextClassLoader().getResourceAsStream(Constants.CONF_FILE));
     }
 
     private static class InstanceHolder {

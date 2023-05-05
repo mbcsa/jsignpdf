@@ -5,9 +5,12 @@
 package net.sf.jsignpdf;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
@@ -35,7 +39,7 @@ import net.sf.jsignpdf.utils.PKCS11Utils;
  *
  * @author maro
  */
-public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultListener {
+public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultListener, WindowListener {
     
     private static final long serialVersionUID = 1L;
     private boolean autoclose = false;
@@ -56,11 +60,12 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     
     public SimpleSignPdfForm(int aCloseOperation, KieOptions kieOptions) {
         initComponents();
-        
         this.kieOptions = kieOptions;
+        addWindowListener(this);
+        
         // PKCS11Utils.unregisterProviders();
         // PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
-        showTokenDetectPanel();
+        
 //        tmpKsTypes = KeyStoreUtils.getKeyStores();
 //        for(String t: tmpKsTypes) {
 //            System.out.println(t);
@@ -74,8 +79,6 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     
     public void showTokenDetectPanel() {
         panel1 = new TokenDetectPanel(this);
-//        panel1.setSize(300,300);
-//        panel1.setLocation(0,0);
         panel1.setLayout(new GridLayout(0, 1));
         
         content.removeAll();
@@ -89,7 +92,7 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
         panel2 = new SignPanel(this.kieOptions);
 //        panel2.setSize(300,300);
 //        panel2.setLocation(0,0);
-        panel1.setLayout(new GridLayout(0, 1));
+        panel2.setLayout(new GridLayout(0, 1));
         content.removeAll();
         content.add(panel2,BorderLayout.CENTER);
         content.revalidate();
@@ -139,7 +142,7 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
             }
         });
 
-        btnPanel1.setText("jButton2");
+        btnPanel1.setText("Cerrar");
         btnPanel1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPanel1ActionPerformed(evt);
@@ -156,7 +159,7 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
                     .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(btnPanel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 430, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 442, Short.MAX_VALUE)
                         .addComponent(btnPanel2)))
                 .addContainerGap())
         );
@@ -178,7 +181,12 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnPanel1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPanel1ActionPerformed
-        
+        Container frame = btnPanel1.getParent();
+            do 
+                frame = frame.getParent(); 
+            while (!(frame instanceof JFrame));                                      
+            ((JFrame) frame).dispose();
+            System.exit(0);
     }//GEN-LAST:event_btnPanel1ActionPerformed
 
     private void btnPanel2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPanel2ActionPerformed
@@ -248,4 +256,47 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
         infoDialog.setVisible(false);
         setVisible(true);
     }// GEN-LAST:event_btnInfoCloseActionPerformed
+
+    @Override
+    public void windowOpened(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        //JOptionPane.showMessageDialog(this, "windowOpened");
+        showTokenDetectPanel();
+    }
+
+    @Override
+    public void windowClosing(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window windowClosing");
+    }
+
+    @Override
+    public void windowClosed(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window windowClosed");
+    }
+
+    @Override
+    public void windowIconified(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window windowIconified");
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window windowDeiconified");
+    }
+
+    @Override
+    public void windowActivated(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window activated");
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent we) {
+        // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // System.out.println("Window DEactivated");
+    }
 }
