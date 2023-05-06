@@ -50,7 +50,8 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     private Set<String> tmpKsTypes;
     
     private KieOptions kieOptions;
-
+    
+    private BasicSignerOptions options;
     /**
      * Creates new form SimpleSignPdfForm
      */
@@ -58,23 +59,24 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
         initComponents();
     }
     
-    public SimpleSignPdfForm(int aCloseOperation, KieOptions kieOptions) {
+    public SimpleSignPdfForm(int aCloseOperation, KieOptions kieOptions, BasicSignerOptions options) {
         initComponents();
         this.kieOptions = kieOptions;
+        if (options == null) {
+            options = new BasicSignerOptions();
+        }
+        options.loadOptions();
+        
+        // Opciones básicas para PKCS11 con Token
+        options.setKsType("PKCS11");
+        options.setAdvanced(false);
+        
+        // TODO: Pedir contraseña al usuario
+        options.setKsPasswd("@Corsisa0123");
+        
+        this.options = options;
+        
         addWindowListener(this);
-        
-        // PKCS11Utils.unregisterProviders();
-        // PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
-        
-//        tmpKsTypes = KeyStoreUtils.getKeyStores();
-//        for(String t: tmpKsTypes) {
-//            System.out.println(t);
-//        }
-//        if (tmpKsTypes.contains("PKCS11")) {
-//            showTokenDetectPanel();
-//        } else {
-//            showSignPanel(tmpKsTypes);
-//        }
     }
     
     public void showTokenDetectPanel() {
@@ -89,7 +91,7 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     }
     
     public void showSignPanel(Set<String> tmpKsTypes) {
-        panel2 = new SignPanel(this.kieOptions);
+        panel2 = new SignPanel(this.kieOptions, options);
 //        panel2.setSize(300,300);
 //        panel2.setLocation(0,0);
         panel2.setLayout(new GridLayout(0, 1));

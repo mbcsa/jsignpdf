@@ -59,6 +59,8 @@ public class KieOptions {
             // List<String> audience = incomingToken.getAudience();
             // Subject tiene el ID de usuario
             this.userId = incomingToken.getSubject();
+            System.out.println(incomingToken.getSubject());
+            System.out.println(incomingToken.getAudience());
             // }
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, null, ex);

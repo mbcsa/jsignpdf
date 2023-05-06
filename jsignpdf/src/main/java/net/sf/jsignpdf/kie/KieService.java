@@ -74,6 +74,10 @@ public class KieService {
         util.getKieUserTaskService().completeTask(containerId, taskId, userId, params);
     }
     
+    public static void nominateTask(String containerId, Long taskId, String userId, List<String> potentialOwners) {
+        util.getKieUserTaskService().nominateTask(containerId, taskId, userId, potentialOwners);
+    }
+    
     public static DocumentInstance getDocument(String documentId) {
         return util.getKieDocumentServicesClient().getDocument(documentId);
     }

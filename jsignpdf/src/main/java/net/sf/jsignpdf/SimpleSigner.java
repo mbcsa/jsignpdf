@@ -166,7 +166,7 @@ public class SimpleSigner {
             } catch (Exception e) {
                 System.err.println("Can't set Look&Feel.");
             }
-            SimpleSignPdfForm tmpForm = new SimpleSignPdfForm(WindowConstants.EXIT_ON_CLOSE, kieOptions);
+            SimpleSignPdfForm tmpForm = new SimpleSignPdfForm(WindowConstants.EXIT_ON_CLOSE, kieOptions, null);
             tmpForm.pack();
             GuiUtils.center(tmpForm);
             tmpForm.setVisible(true);

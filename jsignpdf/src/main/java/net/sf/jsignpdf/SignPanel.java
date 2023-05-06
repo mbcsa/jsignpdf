@@ -15,10 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import static net.sf.jsignpdf.Constants.LOGGER;
 import net.sf.jsignpdf.kie.KieOptions;
 import net.sf.jsignpdf.kie.KieService;
+import net.sf.jsignpdf.types.CertificationLevel;
+import net.sf.jsignpdf.types.HashAlgorithm;
+import net.sf.jsignpdf.types.PDFEncryption;
+import net.sf.jsignpdf.types.PrintRight;
+import net.sf.jsignpdf.utils.KeyStoreUtils;
 import net.sf.jsignpdf.utils.PKCS11Utils;
 import org.apache.commons.io.FileUtils;
 import org.kie.server.api.model.instance.DocumentInstance;
@@ -33,13 +39,15 @@ public class SignPanel extends javax.swing.JPanel {
     private static KieService kieService;
     private TaskInstance taskInstance;
     private KieOptions kieOptions;
-    
+    private SimpleSignerLogic signerLogic;
+    private BasicSignerOptions options;
     /**
      * Creates new form panel2
      */
-    public SignPanel(KieOptions kieOptions) {
+    public SignPanel(KieOptions kieOptions, BasicSignerOptions options) {
         initComponents();
         this.kieOptions = kieOptions;
+        this.options = options;
         jpanelFirma.setVisible(false);
         kieService = KieService.getInstance(this.kieOptions.getJwt());
         try {
@@ -64,7 +72,13 @@ public class SignPanel extends javax.swing.JPanel {
     //                Map.Entry<String, Object> entry = iterator.next();
     //                System.out.println(entry.getKey() + ":" + entry.getValue());
     //            }
-                jpanelFirma.setVisible(true);
+
+                if (loadKeys()) {
+                    jpanelFirma.setVisible(true);
+                }else {
+                    lblDoc.setText("No se encontró ningún certificado en el Token.");
+                    jpanelFirma.setVisible(false);
+                }
             } else {
                 lblDoc.setText("No se encontraron documentos para firmar.");
                 jpanelFirma.setVisible(false);
@@ -74,6 +88,18 @@ public class SignPanel extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "El tiempo especificado para la firma expirado. Vuelva a iniciar el proceso de firma desde el portal.");
             System.exit(0);
         }
+    }
+    
+    private boolean loadKeys(){
+        try {
+            cbAlias.setModel(new DefaultComboBoxModel(KeyStoreUtils.getKeyAliases(options)));
+            if (cbAlias.getItemCount() > 0) {
+                return true;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
     }
 
     /**
@@ -95,6 +121,7 @@ public class SignPanel extends javax.swing.JPanel {
         btnAceptar = new javax.swing.JButton();
         btnRechazar = new javax.swing.JButton();
         lblVersion = new javax.swing.JLabel();
+        cbAlias = new javax.swing.JComboBox<>();
 
         jpanelFirma.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -128,6 +155,9 @@ public class SignPanel extends javax.swing.JPanel {
         lblVersion.setText("Version");
         jpanelFirma.add(lblVersion, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 120, -1, -1));
 
+        cbAlias.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jpanelFirma.add(cbAlias, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 160, 300, -1));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -152,15 +182,20 @@ public class SignPanel extends javax.swing.JPanel {
         // VER: https://blog.kie.org/2020/05/user-tasks-and-forms.html
         // Obtengo la tarea, si no está "Ready",la "tomo"
         System.out.println("Status: " + taskInstance.getStatus());
-        if (taskInstance.getStatus() == "Created") {
-            System.out.println("Tarea en estado 'Created', la reclamo");
+        if (taskInstance.getStatus().equalsIgnoreCase("Ready")) {
+            System.out.println("Ta Ready La reclamo");
             kieService.claimTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
         }
         // Inicio la tarea
-        if ((taskInstance.getStatus() == "Ready") || (taskInstance.getStatus() == "Reserved")) {
-            System.out.println("Tarea en estado 'Ready', la inicio");
+        if (taskInstance.getStatus().equalsIgnoreCase("Reserved")) {
+            System.out.println("Tarea en estado 'Reserved', la inicio");
             kieService.startTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
         }
+        
+        if (!taskInstance.getStatus().equalsIgnoreCase("InProgress")) {
+            System.out.println("Ocurrió un problema al obtener el documento de firma.");
+        }
+        
         System.out.println("Descargo el PDF");
         // Descargo el PDF
         String idDocPDF = taskInstance.getInputData().get("idDocumentoPDF").toString();
@@ -173,14 +208,35 @@ public class SignPanel extends javax.swing.JPanel {
             FileOutputStream fileOuputStream = new FileOutputStream(file);
             fileOuputStream.write(document.getContent());
             fileOuputStream.close();
+            
             // Firmo el PDF
-            System.out.println("PENDIENTE FIRMAR");
-            byte[] inFileBytes = Files.readAllBytes(Paths.get(file.getPath()));
-            document.setContent(inFileBytes);
-            file.deleteOnExit();
-            // Subo el PDF a jBPM
-            System.out.println("Hago el update");
-            kieService.updateDocument(document);
+            options.setInFile(file.getAbsolutePath());
+            options.setOutFile(file.getAbsolutePath() + "_signed");
+            options.setReason("PRUEBA - REASON");
+            options.setLocation("PRUEBA - LOCATION");
+            options.setContact("PRUEBA - CONTACT");
+            options.setAppend(true);
+            options.setVisible(false);
+            
+            storeToOptions();
+            this.signerLogic =  new SimpleSignerLogic(options);
+            if (this.signerLogic.signFile()) {
+                System.out.println("Se firmó correctamente");
+                // Recupero el contenido del archivo firmado
+                byte[] inFileBytes = Files.readAllBytes(Paths.get(file.getPath()));
+                document.setContent(inFileBytes);
+                file.deleteOnExit();
+                // Subo el PDF a jBPM
+                System.out.println("Hago el update");
+                kieService.updateDocument(document);
+                // Completo la tarea con el ID de upload
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("firmaConcesionario", true);
+                kieService.completeTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
+                JOptionPane.showMessageDialog(this, "El documento fue firmado y enviado correctamente. Refresque su navegador.", "Error", JOptionPane.INFORMATION_MESSAGE );
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo realizar la firma.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } catch (FileNotFoundException ex) {
             System.out.println(ex.toString());
             Logger.getLogger(SignPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -188,18 +244,52 @@ public class SignPanel extends javax.swing.JPanel {
             System.out.println(ex.toString());
             Logger.getLogger(SignPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         System.exit(0);
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("firmaConcesionario", true);
-        // Completo la tarea con el ID de upload
-        kieService.completeTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
     }//GEN-LAST:event_btnAceptarActionPerformed
 
+    /**
+     * stores values from this Form to the instance of {@link SignerOptions}
+     */
+    private void storeToOptions() {
+        options.setKsType("PKCS11");
+        options.setAdvanced(false);
+        options.setKsFile("");
+        options.setKsPasswd("");
+        options.setStorePasswords(false);
+        if (cbAlias.getSelectedItem() != options.getKeyAlias() || cbAlias.getSelectedIndex() > -1) {
+            options.setKeyAlias((String) cbAlias.getSelectedItem());
+            options.setKeyIndex(cbAlias.getSelectedIndex());
+        }
+//        options.setKeyPasswd(pfKeyPwd.getPassword());
+//        options.setInFile(tfInPdfFile.getText());
+//        options.setPdfEncryption((PDFEncryption) cbPdfEncryption.getSelectedItem());
+//        options.setPdfOwnerPwd(pfPdfOwnerPwd.getPassword());
+//        options.setPdfUserPwd(pfPdfUserPwd.getPassword());
+//        options.setPdfEncryptionCertFile(tfEncCertFile.getText());
+//        options.setOutFile(tfOutPdfFile.getText());
+//        options.setReason(tfReason.getText());
+//        options.setLocation(tfLocation.getText());
+//        options.setContact(tfContact.getText());
+//        options.setCertLevel((CertificationLevel) cbCertLevel.getSelectedItem());
+//        options.setHashAlgorithm((HashAlgorithm) cbHashAlgorithm.getSelectedItem());
+//        options.setAppend(chkbAppendSignature.isSelected());
+//
+//        options.setRightPrinting((PrintRight) cbPrinting.getSelectedItem());
+//        options.setRightCopy(chkbAllowCopy.isSelected());
+//        options.setRightAssembly(chkbAllowAssembly.isSelected());
+//        options.setRightFillIn(chkbAllowFillIn.isSelected());
+//        options.setRightScreanReaders(chkbAllowScreenReaders.isSelected());
+//        options.setRightModifyAnnotations(chkbAllowModifyAnnotations.isSelected());
+//        options.setRightModifyContents(chkbAllowModifyContent.isSelected());
+//
+//        options.setVisible(chkbVisibleSig.isSelected());
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAceptar;
     private javax.swing.JButton btnRechazar;
+    private javax.swing.JComboBox<String> cbAlias;
     private javax.swing.JPanel jpanelFirma;
     private javax.swing.JLabel lblDescrip;
     private javax.swing.JLabel lblDoc;

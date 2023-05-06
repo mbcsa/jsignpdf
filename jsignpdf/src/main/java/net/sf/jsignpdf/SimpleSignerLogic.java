@@ -89,11 +89,11 @@ import com.lowagie.text.pdf.TSAClientBouncyCastle;
 
 /**
  * Main logic of signer application. It uses iText to create signature in PDF.
- *
- * @author Josef Cacek
+ * Revmove Runnable
  */
-public class SimpleSignerLogic implements Runnable {
 
+public class SimpleSignerLogic {
+    
     private final BasicSignerOptions options;
 
     /**
@@ -106,16 +106,6 @@ public class SimpleSignerLogic implements Runnable {
             throw new NullPointerException("Options has to be filled.");
         }
         options = anOptions;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Runnable#run()
-     */
-    @Override
-    public void run() {
-        signFile();
     }
 
     /**

@@ -44,7 +44,7 @@ public class KieUtil {
         this.authToken = authToken;
         this.credentialsProvider = new EnteredTokenCredentialsProvider(this.authToken);
         // this.config = KieServicesFactory.newRestConfiguration(jbpm_url, credentialsProvider);
-        this.config = KieServicesFactory.newRestConfiguration(jbpm_url,"matiasbcar199831@gmail.com", "123");
+        this.config = KieServicesFactory.newRestConfiguration(jbpm_url,"marianocnh", "123");
         this.config.setMarshallingFormat(MarshallingFormat.JSON);
         this.kieServiceClient = KieServicesFactory.newKieServicesClient(this.config);
     }
