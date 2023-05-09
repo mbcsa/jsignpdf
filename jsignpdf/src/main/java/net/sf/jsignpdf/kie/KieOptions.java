@@ -9,6 +9,12 @@ import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+import static net.sf.jsignpdf.Constants.LOGGER;
+import net.sf.jsignpdf.SimpleSignPdfForm;
+import net.sf.jsignpdf.utils.GuiUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,32 +28,77 @@ public class KieOptions {
     private String containerId;
     private Long taskId;
     private String userId;
+    private String jbpmHost;
+    
+    private static final String kie_url = "/kie-server/services/rest/server";
 
     public void loadOptions(String[] args) {
-        if (args.length != 4) {
-            throw new IllegalArgumentException("Cantidad de parámetros incorrectos");
+        
+        try {
+            if (args != null && args.length > 0) {
+                receiveOptions(args);
+            } else {
+                SimpleWebServer.start(this);
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "Cannot load options", e);
+            JOptionPane.showMessageDialog(null, "El tiempo especificado para la firma expirado. Vuelva a iniciar el proceso de firma desde el portal.");
+            System.exit(0);
+        }
+    }
+    
+    public void loadOptionsFromWebServer(String[] args) {
+        System.out.println("Options Received");
+        // SimpleWebServer.stop();
+        receiveOptions(args);
+    }
+    
+    public void receiveOptions(String[] args) {
+        boolean validation = true;
+        System.out.println("Parametros: " + args.length);
+        for (String arg : args){
+            System.out.println(arg);
+        }
+        if (args.length != 5) {
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Cantidad de parámetros incorrectos (" + args.length + ")");
         }
         
         if (args[0].length() == 0) {
-            throw new IllegalArgumentException("Parámetro incorrecto (1)");
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Parámetro incorrecto (1)");
         }
         
-        if (!isNumeric(args[1])) {
-            throw new IllegalArgumentException("Parámetro incorrecto (2)");
+        if (args[1].length() == 0) {
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Parámetro incorrecto (2)");
         }
         
         if (!isNumeric(args[2])) {
-            throw new IllegalArgumentException("Parámetro incorrecto (3)");
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Parámetro incorrecto (3)");
         }
         
-        if (!isJWT(args[3])) {
-            throw new IllegalArgumentException("Parámetro incorrecto (4)");
+        if (!isNumeric(args[3])) {
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Parámetro incorrecto (4)");
         }
         
-        this.containerId = args[0];
-        this.processInstanceId = Long.parseLong(args[1]);
-        this.taskId = Long.parseLong(args[2]);
-        this.jwt = args[3];
+        if (!isJWT(args[4])) {
+            validation = false;
+            Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, "Parámetro incorrecto (5)");
+        }
+        
+        if (validation == false) {
+            JOptionPane.showMessageDialog(null, "Ocurrió un problema al intentar establecer la conexión con el Servidor.");            
+            System.exit(0);
+        }
+        
+        this.jbpmHost = args[0];
+        this.containerId = args[1];
+        this.processInstanceId = Long.parseLong(args[2]);
+        this.taskId = Long.parseLong(args[3]);
+        this.jwt = args[4];
         
         //verify and use
         JWebToken incomingToken;
@@ -56,16 +107,29 @@ public class KieOptions {
             incomingToken = new JWebToken(this.jwt);
             //TODO: Validar token cuando se resuelva la clave.
             // if (!incomingToken.isValid()) {
-            // List<String> audience = incomingToken.getAudience();
             // Subject tiene el ID de usuario
             this.userId = incomingToken.getSubject();
             System.out.println(incomingToken.getSubject());
             System.out.println(incomingToken.getAudience());
             // }
+            boolean showGui = true;
+
+            if (showGui) {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    System.err.println("Can't set Look&Feel.");
+                }
+                SimpleSignPdfForm tmpForm = new SimpleSignPdfForm(WindowConstants.EXIT_ON_CLOSE, this, null);
+                tmpForm.pack();
+                GuiUtils.center(tmpForm);
+                tmpForm.setVisible(true);
+            }
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(KieOptions.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "No se pudo autenticar con el Servidor.");            
+            System.exit(0);
         }
-        
     }
     
     private static boolean isNumeric(String str) {
@@ -98,7 +162,11 @@ public class KieOptions {
         }
         return true;
     }
-
+    
+    public String getJbpmUrl() {
+        return this.jbpmHost + kie_url;
+    }
+    
     public String getJwt() {
         return jwt;
     }

@@ -92,85 +92,8 @@ public class SimpleSigner {
      */
     public static void main(String[] args) {
         SignerOptionsFromCmdLine tmpOpts = null;
-        
         KieOptions kieOptions = new KieOptions();
-
-        if (args != null && args.length > 0) {
-            try {
-                kieOptions.loadOptions(args);
-            } catch (IllegalArgumentException e) {
-                LOGGER.log(Level.SEVERE, "Cannot load options", e);
-                JOptionPane.showMessageDialog(null, "El tiempo especificado para la firma expirado. Vuelva a iniciar el proceso de firma desde el portal.");
-                System.exit(0);
-            }
-        }
-
-//        try {
-//            SSLInitializer.init();
-//        } catch (Exception e) {
-//            LOGGER.log(Level.WARNING, "Unable to re-configure SSL layer", e);
-//        }
-
-        // PKCS11Utils.registerProviders(ConfigProvider.getInstance().getProperty("pkcs11config.path"));
-
-//        traceInfo();
-        boolean showGui = true;
-//
-//        if (tmpOpts != null) {
-//            showGui = false;
-//            if (tmpOpts.isPrintVersion()) {
-//                System.out.println("JSignPdf version " + VERSION);
-//                return;
-//            }
-//            if (tmpOpts.isPrintHelp()) {
-//                printHelp();
-//                return;
-//            }
-//            if (tmpOpts.isListKeyStores()) {
-//                LOGGER.info(RES.get("console.keystores"));
-//                for (String tmpKsType : KeyStoreUtils.getKeyStores()) {
-//                    System.out.println(tmpKsType);
-//                }
-//                return;
-//            }
-//            if (tmpOpts.isListKeys()) {
-//                final String[] tmpKeyAliases = KeyStoreUtils.getKeyAliases(tmpOpts);
-//                LOGGER.info(RES.get("console.keys"));
-//                // list certificate aliases in the keystore
-//                for (String tmpCert : tmpKeyAliases) {
-//                    System.out.println(tmpCert);
-//                }
-//                return;
-//            }
-//            if (tmpOpts.isGui()) {
-//                showGui = true;
-//            } else if (ArrayUtils.isNotEmpty(tmpOpts.getFiles())
-//                    || (!StringUtils.isEmpty(tmpOpts.getInFile()) && !StringUtils.isEmpty(tmpOpts.getOutFile()))) {
-//                signFiles(tmpOpts);
-//                exit(0);
-//            } else {
-//                final boolean tmpCommand = tmpOpts.isPrintVersion() || tmpOpts.isPrintHelp() || tmpOpts.isListKeyStores()
-//                        || tmpOpts.isListKeys();
-//                if (!tmpCommand) {
-//                    // no valid command provided - print help and exit
-//                    printHelp();
-//                    exit(EXIT_CODE_NO_COMMAND);
-//                }
-//                exit(0);
-//            }
-//        }
-
-        if (showGui) {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                System.err.println("Can't set Look&Feel.");
-            }
-            SimpleSignPdfForm tmpForm = new SimpleSignPdfForm(WindowConstants.EXIT_ON_CLOSE, kieOptions, null);
-            tmpForm.pack();
-            GuiUtils.center(tmpForm);
-            tmpForm.setVisible(true);
-        }
+        kieOptions.loadOptions(args);
     }
 
     /**

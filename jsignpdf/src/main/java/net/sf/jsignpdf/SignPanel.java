@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import static net.sf.jsignpdf.Constants.LOGGER;
 import net.sf.jsignpdf.kie.KieOptions;
 import net.sf.jsignpdf.kie.KieService;
+import net.sf.jsignpdf.kie.SimpleWebServer;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
@@ -49,7 +50,7 @@ public class SignPanel extends javax.swing.JPanel {
         this.kieOptions = kieOptions;
         this.options = options;
         jpanelFirma.setVisible(false);
-        kieService = KieService.getInstance(this.kieOptions.getJwt());
+        kieService = KieService.getInstance(this.kieOptions);
         try {
             // ProcessInstance pi = kieService.getProcessInstance(kieOptions.getContainerId(),kieOptions.getProcessInstanceId());            
             taskInstance = kieService.getTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId());
@@ -182,19 +183,19 @@ public class SignPanel extends javax.swing.JPanel {
         // VER: https://blog.kie.org/2020/05/user-tasks-and-forms.html
         // Obtengo la tarea, si no está "Ready",la "tomo"
         System.out.println("Status: " + taskInstance.getStatus());
-        if (taskInstance.getStatus().equalsIgnoreCase("Ready")) {
-            System.out.println("Ta Ready La reclamo");
-            kieService.claimTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
-        }
-        // Inicio la tarea
-        if (taskInstance.getStatus().equalsIgnoreCase("Reserved")) {
-            System.out.println("Tarea en estado 'Reserved', la inicio");
-            kieService.startTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
-        }
-        
-        if (!taskInstance.getStatus().equalsIgnoreCase("InProgress")) {
-            System.out.println("Ocurrió un problema al obtener el documento de firma.");
-        }
+//        if (taskInstance.getStatus().equalsIgnoreCase("Ready")) {
+//            System.out.println("Ta Ready La reclamo");
+//            kieService.claimTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
+//        }
+//        // Inicio la tarea
+//        if (taskInstance.getStatus().equalsIgnoreCase("Reserved")) {
+//            System.out.println("Tarea en estado 'Reserved', la inicio");
+//            kieService.startTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId());
+//        }
+//        
+//        if (!taskInstance.getStatus().equalsIgnoreCase("InProgress")) {
+//            System.out.println("Ocurrió un problema al obtener el documento de firma.");
+//        }
         
         System.out.println("Descargo el PDF");
         // Descargo el PDF
@@ -232,9 +233,13 @@ public class SignPanel extends javax.swing.JPanel {
                 // Completo la tarea con el ID de upload
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("firmaConcesionario", true);
-                kieService.completeTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
+                // kieService.completeTask(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
+                kieService.completeAutoProgress(this.kieOptions.getContainerId(), this.kieOptions.getTaskId(),this.kieOptions.getUserId(), params);
+                System.out.println("Autocomplete correcto.");
+                SimpleWebServer.setSuccess();
                 JOptionPane.showMessageDialog(this, "El documento fue firmado y enviado correctamente. Refresque su navegador.", "Error", JOptionPane.INFORMATION_MESSAGE );
             } else {
+                SimpleWebServer.setError();
                 JOptionPane.showMessageDialog(this, "No se pudo realizar la firma.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (FileNotFoundException ex) {

@@ -26,6 +26,7 @@ import javax.swing.event.DocumentListener;
 import static net.sf.jsignpdf.Constants.LOGGER;
 import static net.sf.jsignpdf.Constants.RES;
 import net.sf.jsignpdf.kie.KieOptions;
+import net.sf.jsignpdf.kie.SimpleWebServer;
 import net.sf.jsignpdf.types.CertificationLevel;
 import net.sf.jsignpdf.types.HashAlgorithm;
 import net.sf.jsignpdf.types.PDFEncryption;
@@ -116,7 +117,6 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
         btnInfoClose = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         content = new javax.swing.JPanel();
-        btnPanel2 = new javax.swing.JButton();
         btnPanel1 = new javax.swing.JButton();
 
         infoTextArea.setColumns(20);
@@ -137,13 +137,6 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
         content.setBackground(new java.awt.Color(255, 255, 255));
         content.setLayout(new java.awt.GridLayout(1, 0));
 
-        btnPanel2.setText("jButton3");
-        btnPanel2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPanel2ActionPerformed(evt);
-            }
-        });
-
         btnPanel1.setText("Cerrar");
         btnPanel1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -158,12 +151,12 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(btnPanel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 442, Short.MAX_VALUE)
-                        .addComponent(btnPanel2)))
-                .addContainerGap())
+                        .addGap(115, 532, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -171,9 +164,7 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
                 .addContainerGap()
                 .addComponent(content, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnPanel2)
-                    .addComponent(btnPanel1))
+                .addComponent(btnPanel1)
                 .addGap(27, 27, 27))
         );
 
@@ -190,10 +181,6 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
             ((JFrame) frame).dispose();
             System.exit(0);
     }//GEN-LAST:event_btnPanel1ActionPerformed
-
-    private void btnPanel2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPanel2ActionPerformed
-        
-    }//GEN-LAST:event_btnPanel2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -233,7 +220,6 @@ public class SimpleSignPdfForm extends javax.swing.JFrame implements SignResultL
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnInfoClose;
     private javax.swing.JButton btnPanel1;
-    private javax.swing.JButton btnPanel2;
     private javax.swing.JPanel content;
     private javax.swing.JFrame infoDialog;
     private javax.swing.JScrollPane infoScrollPane;

@@ -30,21 +30,16 @@ import org.kie.server.client.DocumentServicesClient;
 public class KieUtil {
     
     static final long serialVersionUID = 1L;
-    
-    private static final String jbpm_url = "http://jbpm.test.corsisa.com.ar/kie-server/services/rest/server";
  
-    private String authToken = "";
-    
     private static CredentialsProvider credentialsProvider;
     private static KieServicesConfiguration config;
     private static KieServicesClient kieServiceClient;
     private static UserTaskServicesClient userTaskService;
     
-    public KieUtil(String authToken) {
-        this.authToken = authToken;
-        this.credentialsProvider = new EnteredTokenCredentialsProvider(this.authToken);
-        // this.config = KieServicesFactory.newRestConfiguration(jbpm_url, credentialsProvider);
-        this.config = KieServicesFactory.newRestConfiguration(jbpm_url,"marianocnh", "123");
+    public KieUtil(KieOptions kieOptions) {
+        this.credentialsProvider = new EnteredTokenCredentialsProvider(kieOptions.getJwt());
+        //this.config = KieServicesFactory.newRestConfiguration(kieOptions.getJbpmUrl(), credentialsProvider);
+        this.config = KieServicesFactory.newRestConfiguration(kieOptions.getJbpmUrl(),"marohds", "Corsisa01");
         this.config.setMarshallingFormat(MarshallingFormat.JSON);
         this.kieServiceClient = KieServicesFactory.newKieServicesClient(this.config);
     }

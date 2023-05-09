@@ -17,7 +17,7 @@ import org.kie.server.api.model.instance.TaskInstance;
  */
 public class KieService {
     
-    private static String userAuthToken;
+    private static KieOptions kieOptions;
     private static KieUtil util;
     
     //create an object of SingleObject
@@ -26,22 +26,18 @@ public class KieService {
     //make the constructor private so that this class cannot be
     //instantiated
     private KieService(){
-        util = new KieUtil(userAuthToken);
+        util = new KieUtil(kieOptions);
     }
 
     //Get the only object available
-    public static KieService getInstance(String authToken){
+    public static KieService getInstance(KieOptions options){
         if (instance == null) {
-            if (authToken.isBlank() && userAuthToken.isBlank()) {
-                throw new NullPointerException("Auth token not assigned.");
-            } else {
-                if (!authToken.isBlank()) {
-                    userAuthToken = authToken;
-                }
+            if (options == null) {
+                throw new NullPointerException("KIE Options not specified.");
+            } else {    
+                kieOptions = options;
             }
             instance = new KieService();
-        } else {
-            
         }
        return instance;
     }
@@ -72,6 +68,10 @@ public class KieService {
     
     public static void completeTask(String containerId, Long taskId, String userId, Map<String, Object> params) {
         util.getKieUserTaskService().completeTask(containerId, taskId, userId, params);
+    }
+    
+    public static void completeAutoProgress(String containerId, Long taskId, String userId, Map<String, Object> params) {
+        util.getKieUserTaskService().completeAutoProgress(containerId, taskId, userId, params);
     }
     
     public static void nominateTask(String containerId, Long taskId, String userId, List<String> potentialOwners) {
